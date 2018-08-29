@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Smtp
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -30,7 +26,6 @@ class Metasploit3 < Msf::Auxiliary
       ],
         'Author'      =>
       [
-        '==[ Alligator Security Team ]==',
         'Heyder Andrade <heyder[at]alligatorteam.org>',
         'nebulus'
       ],
@@ -46,7 +41,7 @@ class Metasploit3 < Msf::Auxiliary
             File.join(Msf::Config.install_root, 'data', 'wordlists', 'unix_users.txt')
           ]),
         OptBool.new('UNIXONLY', [ true, 'Skip Microsoft bannered servers when testing unix users', true])
-      ], self.class)
+      ])
 
     deregister_options('MAILTO','MAILFROM')
   end
@@ -214,5 +209,4 @@ class Metasploit3 < Msf::Auxiliary
     save_array = words.split(/\r?\n/)
     return save_array
   end
-
 end

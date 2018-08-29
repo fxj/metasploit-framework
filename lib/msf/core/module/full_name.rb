@@ -12,7 +12,7 @@ module Msf::Module::FullName
 
 
     # @attribute refname
-    #   The module's name that is assigned it it by the framework
+    #   The module's name that is assigned to it by the framework
     #   or derived from the path that the module is loaded from.
     attr_accessor :refname
 
@@ -21,7 +21,11 @@ module Msf::Module::FullName
     #
 
     def fullname
-      type + '/' + refname
+      "#{type}/#{refname}"
+    end
+
+    def promptname
+      refname
     end
 
     def shortname
@@ -55,9 +59,16 @@ module Msf::Module::FullName
   end
 
   #
-  # Returns the module's framework short name.  This is a
-  # possibly conflicting name used for things like console
-  # prompts.
+  # Returns the module's framework prompt-friendly name.
+  #
+  # reverse_tcp
+  #
+  def promptname
+    self.class.promptname
+  end
+
+  #
+  # Returns the module's framework short name.
   #
   # reverse_tcp
   #

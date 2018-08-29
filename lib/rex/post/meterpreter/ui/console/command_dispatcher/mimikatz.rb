@@ -26,7 +26,7 @@ class Console::CommandDispatcher::Mimikatz
   #
   def initialize(shell)
     super
-    if (client.platform =~ /x86/) and (client.sys.config.sysinfo['Architecture'] =~ /x64/)
+    if client.arch == ARCH_X86 and client.sys.config.sysinfo['Architecture'] == ARCH_X64
       print_line
       print_warning "Loaded x86 Mimikatz on an x64 architecture."
     end
@@ -37,7 +37,7 @@ class Console::CommandDispatcher::Mimikatz
   #
   def commands
     {
-      "mimikatz_command" => "Run a custom commannd",
+      "mimikatz_command" => "Run a custom command",
       "wdigest" => "Attempt to retrieve wdigest creds",
       "msv" => "Attempt to retrieve msv creds (hashes)",
       "livessp" => "Attempt to retrieve livessp creds",
@@ -95,7 +95,7 @@ class Console::CommandDispatcher::Mimikatz
     print_status("Retrieving #{provider} credentials")
     accounts = method.call
 
-    table = Rex::Ui::Text::Table.new(
+    table = Rex::Text::Table.new(
       'Header' => "#{provider} credentials",
       'Indent' => 0,
       'SortIndex' => 4,
@@ -159,7 +159,7 @@ class Console::CommandDispatcher::Mimikatz
   end
 
   def system_check
-    unless (client.sys.config.getuid == "NT AUTHORITY\\SYSTEM")
+    unless client.sys.config.is_system?
       print_warning("Not currently running as SYSTEM")
       return false
     end

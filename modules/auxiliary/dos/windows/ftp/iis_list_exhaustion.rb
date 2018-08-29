@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Ftp
   include Msf::Auxiliary::Dos
 
@@ -42,7 +39,7 @@ class Metasploit3 < Msf::Auxiliary
   end
 
   def run
-    #Attempt to crash IIS FTP
+    # Attempt to crash IIS FTP
     begin
       return unless connect_login
       print_status('Checking if there is at least one directory ...')
@@ -115,5 +112,4 @@ class Metasploit3 < Msf::Auxiliary
     ret = [ ret, data ]
     ret
   end
-
 end

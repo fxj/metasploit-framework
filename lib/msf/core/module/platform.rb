@@ -10,7 +10,7 @@ require 'abbrev'
 class Msf::Module::Platform
 
   Rank  = 0
-  # actually, having a argument of '' is what to do for wanting 'all'
+  # actually, having an argument of '' is what to do for wanting 'all'
   Short = "all"
 
   class << self
@@ -18,7 +18,7 @@ class Msf::Module::Platform
   end
 
   #
-  # Returns the "real" name of the module instance, accouting for potentially
+  # Returns the "real" name of the module instance, accounting for potentially
   # aliased class names.
   #
   def self.realname
@@ -143,8 +143,7 @@ class Msf::Module::Platform
 
     if (not mod.const_defined?('Names'))
       elog("Failed to instantiate the platform list for module #{mod}")
-      raise RuntimeError.new("Failed to instantiate the platform list for module #{mod}")
-      return nil
+      raise "Failed to instantiate the platform list for module #{mod}"
     end
 
     abbrev   = mod.const_get('Abbrev')
@@ -353,6 +352,14 @@ class Msf::Module::Platform
   end
 
   #
+  # R
+  #
+  class R < Msf::Module::Platform
+    Rank = 100
+    Alias = "r"
+  end
+
+  #
   # Ruby
   #
   class Ruby < Msf::Module::Platform
@@ -374,6 +381,14 @@ class Msf::Module::Platform
   class Cisco < Msf::Module::Platform
     Rank = 100
     Alias = "cisco"
+  end
+
+  #
+  # Juniper
+  #
+  class Juniper < Msf::Module::Platform
+    Rank = 100
+    Alias = "juniper"
   end
 
   #
@@ -408,6 +423,10 @@ class Msf::Module::Platform
     class V10
       Rank = 700
       Alias = "10"
+    end
+    class V11
+      Rank = 800
+      Alias = "11"
     end
   end
 
@@ -524,4 +543,37 @@ class Msf::Module::Platform
     Rank = 100
     Alias = "firefox"
   end
+
+  #
+  # Mainframe
+  #
+  class Mainframe < Msf::Module::Platform
+    Rank = 100
+    Alias = "mainframe"
+  end
+
+  #
+  # Multi (for wildcard-style platform functions)
+  #
+  class Multi < Msf::Module::Platform
+    Rank = 100
+    Alias = "multi"
+  end
+
+  #
+  # Hardware
+  #
+  class Hardware < Msf::Module::Platform
+    Rank = 100
+    Alias = "hardware"
+  end
+
+  #
+  # Apple iOS
+  #
+  class Apple_iOS < Msf::Module::Platform
+    Rank = 100
+    Alias = "apple_ios"
+  end
+
 end

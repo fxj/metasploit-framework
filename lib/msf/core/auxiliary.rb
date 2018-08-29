@@ -6,7 +6,7 @@ module Msf
 ###
 #
 # The auxiliary class acts as a base class for all modules that perform
-# reconnaisance, retrieve data, brute force logins, or any other action
+# reconnaissance, retrieve data, brute force logins, or any other action
 # that doesn't fit our concept of an 'exploit' (involving payloads and
 # targets and whatnot).
 #
@@ -14,6 +14,12 @@ module Msf
 class Auxiliary < Msf::Module
 
   require 'msf/core/auxiliary/mixins'
+
+  class Complete < RuntimeError
+  end
+
+  class Failed < RuntimeError
+  end
 
   include HasActions
 
@@ -150,6 +156,11 @@ class Auxiliary < Msf::Module
       end
       true
     }
+  end
+
+  # Override Msf::Module#fail_with for Msf::Simple::Auxiliary::job_run_proc
+  def fail_with(reason, msg = nil)
+    raise Msf::Auxiliary::Failed, "#{reason.to_s}: #{msg}"
   end
 
   attr_accessor :queue
